@@ -1,0 +1,8 @@
+asyncpg
+fastapi
+uvicorn
+sqlmodel
+sqlalchemy[asyncio]
+httpx
+orjson
+jinja2

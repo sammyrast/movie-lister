@@ -1,0 +1,26 @@
+<html>
+<head>
+    <title>Video Details</title>
+</head>
+<body>
+   
+
+    <p>Video lists: <br><br>
+    {% for d in data %}
+      <img style="border: 2px; align-items: right;" src={{d.iconUri}} />
+        <li>shortName: {{d.shortName}} </li>    
+        <li>manifestUri: {{d.manifestUri}} </li>
+        <li>disabled: {{d.disabled}} </li>
+        <li>source: {{d.source}} </li>
+        <li>focus: {{d.focus}}</li>
+        <li>features: {{d.features}} </li>
+        <li>drm: {{d.drm}} </li>
+        <li>licenseServers: {{d.licenseServers}} </li>
+        <br><br><br>
+        
+           {% endfor %}
+            
+        
+          </svg>
+</body>
+</html>
