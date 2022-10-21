@@ -6,6 +6,8 @@
 - no searching
 - not pretty at all for user
 - env. variables are exposed and secrets are out.
+- GITHUB ACTION for CI/CD
+- UNIT TESTING
 
 # hardware
 macbook pro 2019
