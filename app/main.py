@@ -46,7 +46,7 @@ class Video(SQLModel, table=True):
 # FIXME NOT GOOD 
 DATABSAE_URL = "postgresql+asyncpg://postgres:postgres@postgres/postgres"
 
-async_engine = create_async_engine(DATABSAE_URL, echo=True)
+async_engine = create_async_engine(DATABSAE_URL, echo=False)
 
 async_session = sessionmaker(
     async_engine, expire_on_commit=False, class_=AsyncSession
@@ -79,21 +79,24 @@ async def read_videos():
 async def external_videos(request: Request):
     """Retrieves all videos available from the external API."""
 
-    video : Video = await video_downloader_service.get_videos()
-    if video is not None: 
-        for vid in video:
-            data = Video(**vid)
-            async with async_session() as session:
-                session.add(data)
-                await session.commit()  
-
-        json_compatible_data = jsonable_encoder(video)
-        return templates.TemplateResponse("index.html", {"request": request, "data": json_compatible_data})
-    elif video is None:
-        # in this case we need to get the data from db.
-       async with async_session() as session:
+    
+    async with async_session() as session:    
+        print("getting data directly from api")
+        video : Video = await video_downloader_service.get_videos()
+        if video is not None: 
+            for vid in video:
+                data = Video(**vid)
+                async with async_session() as session:
+                    session.add(data)
+                    await session.commit()  
+                    await session.refresh(data)
+    
+    async with async_session() as session:
         result = await session.execute(select(Video))
         videos = result.all() 
-        json_compatible_data = jsonable_encoder(videos)
-        return templates.TemplateResponse("index.html", {"request": request, "data": json_compatible_data})
 
+        if videos:
+            json_compatible_data = jsonable_encoder(videos)
+
+        return templates.TemplateResponse("index.html", {"request": request, "data": json_compatible_data})
+    
