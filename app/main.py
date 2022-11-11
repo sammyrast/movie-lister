@@ -64,6 +64,18 @@ app = FastAPI()
 @app.on_event("startup")
 async def on_startup():
     await create_db_and_tables()
+    async with async_session() as session:    
+        print("getting data directly from api")
+        video : Video = await video_downloader_service.get_videos()
+        if video is not None: 
+            for vid in video:
+                data = Video(**vid)
+                print("adding data")
+                async with async_session() as session:
+                    session.add(data)
+                    await session.commit()  
+                    await session.refresh(data)
+    
 
 
 @app.get("/videos/")
@@ -79,24 +91,12 @@ async def read_videos():
 async def external_videos(request: Request):
     """Retrieves all videos available from the external API."""
 
-    
-    async with async_session() as session:    
-        print("getting data directly from api")
-        video : Video = await video_downloader_service.get_videos()
-        if video is not None: 
-            for vid in video:
-                data = Video(**vid)
-                async with async_session() as session:
-                    session.add(data)
-                    await session.commit()  
-                    await session.refresh(data)
-    
     async with async_session() as session:
         result = await session.execute(select(Video))
         videos = result.all() 
 
         if videos:
-            json_compatible_data = jsonable_encoder(videos)
-
-        return templates.TemplateResponse("index.html", {"request": request, "data": json_compatible_data})
-    
+            for video in videos:
+                print(f"video={video}")
+                json_compatible_data = jsonable_encoder(video)
+                return templates.TemplateResponse("index.html", {"request": request, "data": json_compatible_data})
