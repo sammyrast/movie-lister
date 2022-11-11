@@ -76,8 +76,6 @@ async def on_startup():
                     await session.commit()  
                     await session.refresh(data)
     
-
-
 @app.get("/videos/")
 async def read_videos():
     """Retrieve the video items from database."""
@@ -97,6 +95,7 @@ async def external_videos(request: Request):
 
         if videos:
             for video in videos:
-                print(f"video={video}")
-                json_compatible_data = jsonable_encoder(video)
+                video_dict = video._asdict()
+                video_values = video_dict['Video']
+                json_compatible_data = jsonable_encoder(video_values)
                 return templates.TemplateResponse("index.html", {"request": request, "data": json_compatible_data})
